@@ -1,4 +1,5 @@
 import { db } from "../datastore/memorydb.js";
+import crypto from "crypto";
 
 export const listPosts = (_req, res) => {
     if (db.listPosts().length < 1 || !db.listPosts())
@@ -15,19 +16,19 @@ export const listPosts = (_req, res) => {
 
 export const createPost = (req, res) => {
     try {
-        const { id, title, username } = req.body;
-        if (
-            !id ||
-            !title ||
-            typeof title !== "string" ||
-            !username ||
-            typeof username !== "string"
-        )
+        const { title, url, userId } = req.body;
+        if (!url || !title || typeof title !== "string" || !userId)
             return res.status(400).json({
                 success: false,
                 msj: `Please insert valid id and title and username`,
             });
-        const newPost = { id, title, username };
+        const newPost = {
+            id: crypto.randomUUID(),
+            title,
+            url,
+            userId,
+            postedAt: Date.now(),
+        };
         db.createPost(newPost);
         return res.status(201).json({
             success: true,
